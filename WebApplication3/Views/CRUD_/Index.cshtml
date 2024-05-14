@@ -1,0 +1,111 @@
+﻿@model WebApplication3.Models.Customer
+
+@using System.Configuration
+
+@{
+    ViewBag.Title = "CRUD_1";
+
+    string path = ConfigurationManager.AppSettings["webapilocatoin"];
+}
+
+<h2>Opera Info - @path</h2>
+
+<form id="form1">
+    @Html.EditorForModel()
+</form>
+<hr />
+<div>
+    <input type="button" id="btnAll" value="List" />
+    <input type="button" id="btnGet" value="Get" />
+    <input type="button" id="btnInsert" value="Insert" />
+    <input type="button" id="btnUpdate" value="Update" />
+    <input type="button" id="btnDelete" value="Delete" />
+</div>
+<ul id="list"></ul>
+
+@section scripts{
+    <script>
+    $(() => {
+        var path="@path";
+
+        async function getAll() {
+            $("#list").empty();
+
+            var response = await fetch(path);
+            var result = await response.json();
+            result.forEach(item => {
+                $("#list").append(`<li>${item.customerId}---${item.companyName}</li>`);
+            });
+        }
+        $("#btnDelete").on("click", () => {
+            // alert(`${path}/${$("#OperaID").val()}`);
+            fetch(`${path}/${$("#CustomerID").val()}`, {
+                method: "delete"
+            })
+                .then(getAll);
+        });
+
+
+        $("#btnUpdate").on("click", () => {
+            // alert(`${path}/${$("#OperaID").val()}`);
+            fetch(`${path}/${$("#CustomerID").val()}`, {
+                method: "put",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded"
+                },
+                body: $("#form1").serialize()
+            })
+                .then(getAll);
+        });
+
+
+
+        $("#btnInsert").on("click", () => {
+            //alert(`title=${$("#Title").val()}&year=${$("#Year").val()}&composer=${$("#Composer").val()}`);
+            fetch(path, {
+                method: "post",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded"
+                },
+                //下下策解法 ，因自動id無法帶入web會產生500狀態碼
+                //body: `customerId=${$("#CustomerId").val()}&companyName=${$("#CompanyName").val()}&contactName=${$("#ContactName").val()}&contactTitle=${$("#ContactTitle").val()}&address=${$("#Address").val()}&city=${$("#City").val()}&region=${$("#Region").val()}&postalCod=${$("#PostalCode").val()}&country=${$("#Country").val()}&phonen=${$("#Phonen").val()}&fax=${$("#Fax").val()}`
+                body: $("#form1").serialize()
+            })
+                .then(getAll);
+
+        });
+
+
+        $("#btnAll").on("click", getAll);
+
+        $("#btnGet").on("click", () => {
+            fetch(`${path}/${$("#CustomerID").val()}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw response.statusText;
+                    }
+                })
+        .then(item => {
+            $("#CompanyName").val(item.companyName);
+            $("#ContactName").val(item.contactName);
+            $("#ContactTitle").val(item.contactTitle);
+            $("#Address").val(item.address);
+            $("#City").val(item.city);
+            $("#Region").val(item.region);
+            $("#PostalCode").val(item.postalCode);
+            $("#Country").val(item.country);
+            $("#Phone").val(item.phone);
+            $("#Fax").val(item.fax);
+        })
+                .catch(error => {
+                    alert(error)
+
+            });
+        });
+
+
+    });
+    </script>
+}

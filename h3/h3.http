@@ -1,0 +1,6 @@
+@h3_HostAddress = http://localhost:5257
+
+GET {{h3_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
